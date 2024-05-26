@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Update 'VARIANT' to pick an LTS version of Node.js: 18, 16, 14.
+        # Append -bullseye or -buster to pin to an OS version.
+        # Use -bullseye variants on local arm64/Apple Silicon.
+        VARIANT: 18-bullseye
+    volumes:
+      - ..:/workspace:cached
+
+    command: sleep infinity
+
+
+
+  mongodb:
+    image: mongo:latest
+    restart: unless-stopped
+    volumes:
+      - ./mongodb-data:/data/db
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    ports:
+      - "27017:27017"
+
+  mysql:
+    image: mariadb:latest
+    restart: always
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+      MYSQL_DATABASE : ${DATABASE_NAME}
+      MYSQL_USER: ${DATABASE_USERNAME}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_PORT: ${MYSQL_PORT}
+    ports:
+      - "3456:3306"
